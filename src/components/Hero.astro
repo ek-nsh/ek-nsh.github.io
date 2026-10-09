@@ -1,0 +1,121 @@
+---
+import { profile } from '../data/profile';
+---
+
+<section class="hero" id="top" data-hero>
+  <!-- A white hole: it only ever gives. A pixel star core, slow dotted shock rings and pixel shapes
+       spiralling out (all drawn on one canvas, see ejecta.ts). The page ends at a black hole, where
+       everything falls back in. Poke the core three times. -->
+  <div class="star" aria-hidden="true" data-star>
+    <canvas class="ejecta" data-ejecta></canvas>
+    <!-- The core is a pixel star that twinkles in steps: no ring, no halo. -->
+    <svg class="core" data-core viewBox="0 0 9 9" shape-rendering="crispEdges" aria-hidden="true">
+      <g class="arms a"><rect x="4" y="0" width="1" height="3"></rect><rect x="4" y="6" width="1" height="3"></rect></g>
+      <g class="arms b"><rect x="0" y="4" width="3" height="1"></rect><rect x="6" y="4" width="3" height="1"></rect></g>
+      <rect x="3" y="3" width="3" height="3"></rect>
+    </svg>
+    <span class="core-hit" data-core-hit data-cursor-label="Ignite"></span>
+  </div>
+
+  <div class="wrap hero-inner">
+    <h1 class="hero-name" aria-label={profile.fullName} data-hero-name>
+      <span class="line">
+        {[...profile.name].map((ch) => <span class="ch" aria-hidden="true">{ch}</span>)}
+      </span>
+    </h1>
+
+    <div class="hero-lower">
+      <p class="tagline" data-hero-fade>{profile.tagline}</p>
+
+      <div class="intro" data-tour="intro" data-hero-fade>
+        <p>
+          {profile.intro.map((part) =>
+            typeof part === 'string' ? part : <span class="hl">{part.hl}</span>,
+          )}
+        </p>
+      </div>
+
+      <div class="hero-foot" data-hero-fade>
+        {profile.status.open && (
+          <span class="status"><span class="dot" aria-hidden="true"></span>{profile.status.text}</span>
+        )}
+        <span class="mono scroll-hint" aria-hidden="true">Fall in <i>↓</i></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero { position: relative; min-height: 100svh; overflow: clip; }
+
+  /* The text layer sits above the star but lets the pointer through, so the core stays pokeable. */
+  .hero-inner { pointer-events: none; }
+  .hero-name, .tagline, .intro, .status { pointer-events: auto; }
+
+  .hero-inner {
+    position: relative; z-index: 1;
+    min-height: 100svh;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding-top: calc(var(--header-h) + 5svh);
+    padding-bottom: 28px;
+  }
+
+  .hero-name {
+    font-size: clamp(76px, 19vw, 320px);
+    font-weight: 300;
+    line-height: 0.92;
+    letter-spacing: -0.055em;
+    margin-left: -0.04em;
+    width: fit-content;
+  }
+  .line { display: block; overflow: hidden; padding-bottom: 0.14em; margin-bottom: -0.14em; white-space: nowrap; }
+  .ch { display: inline-block; will-change: transform; }
+
+  .hero-lower { display: grid; gap: clamp(24px, 4svh, 44px); margin-top: 4svh; }
+
+  .tagline { font-size: clamp(18px, 2.1vw, 30px); color: var(--ink-2); letter-spacing: -0.01em; }
+
+  .intro { max-width: 34em; font-size: clamp(20px, 2.1vw, 30px); line-height: 1.32; letter-spacing: -0.015em; }
+
+  .hero-foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .status {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 8px 14px 8px 12px; border: 1px solid var(--line); border-radius: 999px;
+    background: var(--card);
+    font-size: 13px; font-weight: 500;
+  }
+  .scroll-hint i { display: inline-block; font-style: normal; animation: bob 2.4s ease-in-out infinite; }
+  @keyframes bob { 0%, 100% { transform: translateY(-2px); } 50% { transform: translateY(3px); } }
+
+  .js:not(.reduced) .hero-name { visibility: hidden; }
+  .js:not(.reduced) [data-hero-fade] { opacity: 0; }
+
+  /* ---- The dying star (flat: hairlines and solid shapes only) ---- */
+  .star {
+    position: absolute; z-index: 0;
+    right: -4vw; top: 14svh;
+    width: min(64vmin, 760px); aspect-ratio: 1;
+    pointer-events: none;
+  }
+  .ejecta { position: absolute; inset: 0; }
+  .core {
+    position: absolute; left: 50%; top: 50%; width: 27px; height: 27px; margin: -13.5px 0 0 -13.5px;
+    fill: var(--ember);
+  }
+  .core .arms { animation: twinkle 3.6s steps(1) infinite; }
+  .core .arms.b { animation-delay: -1.8s; }
+  .core-hit {
+    position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px;
+    border-radius: 50%; pointer-events: auto;
+  }
+
+  @keyframes twinkle {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  @media (max-width: 720px) {
+    .star { right: -28vw; top: 10svh; width: 110vw; opacity: 0.8; }
+    .scroll-hint { display: none; }
+  }
+</style>

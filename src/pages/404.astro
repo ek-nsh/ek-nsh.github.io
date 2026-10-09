@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Base title="404 · Past the event horizon" description="This page is not here.">
+  <section class="lost wrap" data-lost>
+    <div class="hole" aria-hidden="true">
+      <canvas data-lost-hole></canvas>
+    </div>
+    <p class="mono">Error 404</p>
+    <h1>This page crossed the event horizon.</h1>
+    <p class="sub">Nothing comes back from there, but the rest of the sky is fine.</p>
+    <a class="pill" href={`${base}/`} data-cursor-label="Home">Return to the surface</a>
+  </section>
+</Base>
+
+<script>
+  // A small pixel black hole, drawn with the same engine as the one at the end of the home page.
+  import { Accretion } from '../scripts/hole';
+  const canvas = document.querySelector<HTMLCanvasElement>('[data-lost-hole]');
+  if (canvas) {
+    const size = Math.min(window.innerWidth * 0.9, 460);
+    const hole = new Accretion(canvas, {
+      size,
+      horizon: Math.round(size / 3 / 7),
+      outer: Math.round(size / 3 / 2) - 2,
+      count: 240,
+      seed: 404,
+      light: true,
+      active: () => !document.hidden,
+    });
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) hole.still();
+    else hole.wake();
+  }
+</script>
+
+<style>
+  .lost {
+    min-height: 100svh; display: grid; align-content: center; justify-items: center; gap: 18px;
+    padding-top: calc(var(--header-h) + 24px); text-align: center;
+  }
+  .hole { margin-bottom: 6px; }
+  .hole canvas { display: block; max-width: 100%; }
+
+  h1 { font-size: clamp(32px, 5.4vw, 76px); font-weight: 300; line-height: 1.02; letter-spacing: -0.045em; max-width: 14em; }
+  .sub { color: var(--ink-2); font-size: 17px; margin-bottom: 10px; }
+</style>

@@ -1,0 +1,28 @@
+/* Viewfinder plates: a hairline frame with corner brackets around a pixel picture. Global because
+   the home reel, the home research teaser, the project pages and the research page all use it. */
+
+.plate { position: relative; aspect-ratio: 2.1 / 1; background: var(--wash); overflow: hidden; }
+.plate-art { position: absolute; inset: 0; width: 100%; height: 100%; }
+.vf { position: absolute; width: 18px; height: 18px; border: 0 solid var(--ink); opacity: 0.8; pointer-events: none; }
+.vf.tl { left: 10px; top: 10px; border-width: 1px 0 0 1px; }
+.vf.tr { right: 10px; top: 10px; border-width: 1px 1px 0 0; }
+.vf.bl { left: 10px; bottom: 10px; border-width: 0 0 1px 1px; }
+.vf.br { right: 10px; bottom: 10px; border-width: 0 1px 1px 0; }
+.vfm { position: absolute; font-size: 10px; letter-spacing: 0.08em; color: var(--ink-2); pointer-events: none; }
+.m-tl { left: 36px; top: 12px; }
+.m-tr { right: 36px; top: 12px; }
+.m-bl { left: 36px; bottom: 12px; }
+.m-br { right: 36px; bottom: 12px; }
+
+/* A crosshair follows the pointer over a plate, with a live readout. */
+.xh { position: absolute; background: var(--ember); opacity: 0; transition: opacity 0.3s var(--ease); pointer-events: none; }
+.xh.h { left: 0; right: 0; top: var(--my, 50%); height: 1px; }
+.xh.v { top: 0; bottom: 0; left: var(--mx, 50%); width: 1px; }
+.plate.is-hover .xh { opacity: 0.35; }
+
+/* The full-size, interactive version on a project or research page. */
+.plate.live { aspect-ratio: 2.05 / 1; cursor: crosshair; touch-action: manipulation; }
+@media (max-width: 860px) {
+  .plate { aspect-ratio: 1.25 / 1; }
+  .plate.live { aspect-ratio: 1.1 / 1; }
+}

@@ -1,0 +1,43 @@
+---
+import { nav } from '../data/nav';
+import Sprite from './Sprite.astro';
+import type { SpriteName } from '../lib/sprites';
+
+interface Props {
+  /** The path prefix of the current page, e.g. "/work". */
+  from: string;
+}
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const { from } = Astro.props;
+
+// The tour of the site, in order; after the last page the loop goes home.
+const pages = nav.filter((n) => n.match);
+const i = pages.findIndex((p) => p.match === from);
+const next = pages[i + 1] ?? { href: `${base}/`, label: 'Home', match: '' };
+
+const icons: Record<string, SpriteName> = {
+  '/trajectory': 'star', '/work': 'hive', '/research': 'commit', '/writing': 'book', '/lab': 'knight', '': 'moon',
+};
+const hints: Record<string, string> = {
+  '/trajectory': 'Where it started', '/work': 'What I have built', '/research': 'What I am asking',
+  '/writing': 'How I think', '/lab': 'What is on the desk', '': 'Back to the start',
+};
+---
+
+<nav class="next wrap" aria-label="Next page">
+  <a href={next.href} data-cursor-label="Next">
+    <span class="mono">Next · {hints[next.match]}</span>
+    <span class="big"><Sprite name={icons[next.match]} size={36} />{next.label}<i aria-hidden="true">→</i></span>
+  </a>
+</nav>
+
+<style>
+  .next { padding-block: clamp(72px, 10vw, 140px) clamp(40px, 6vw, 80px); }
+  a { display: grid; gap: 12px; padding-top: 28px; border-top: 1px solid var(--line); }
+  .big { display: flex; align-items: center; gap: 18px; font-size: clamp(40px, 7vw, 104px); font-weight: 300; letter-spacing: -0.045em; line-height: 1; transition: color 0.4s var(--ease); }
+  .big :global(.sprite) { color: var(--ember); }
+  .big i { font-style: normal; margin-left: auto; transition: transform 0.5s var(--ease); }
+  a:hover .big { color: var(--ember); }
+  a:hover .big i { transform: translateX(10px); }
+</style>

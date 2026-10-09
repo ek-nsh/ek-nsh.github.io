@@ -1,0 +1,91 @@
+---
+import { profile } from '../data/profile';
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<!-- Guided tour overlay. Hidden until "Recruiter mode" is started. See src/scripts/tour.ts. -->
+<div class="rm" data-rm data-base={base} hidden>
+  <div class="rm-spot" data-rm-spot></div>
+
+  <section class="rm-card" data-rm-card tabindex="-1" role="dialog" aria-label="Recruiter mode: guided tour" aria-live="polite">
+    <div class="rm-row">
+      <span class="rm-badge"><span class="dot" aria-hidden="true"></span>Recruiter mode</span>
+      <span class="mono" data-rm-kicker>01 / 05</span>
+    </div>
+
+    <h3 class="rm-title" data-rm-title></h3>
+    <p class="rm-text" data-rm-text></p>
+
+    <div class="rm-end" data-rm-end hidden>
+      <a class="rm-btn primary" href={`mailto:${profile.email}`}>Get in touch</a>
+      <button class="rm-btn" type="button" data-rm-explore>Keep exploring</button>
+    </div>
+
+    <div class="rm-bar" aria-hidden="true"><i data-rm-progress></i></div>
+
+    <div class="rm-row rm-controls">
+      <div class="rm-steps">
+        <button type="button" class="rm-icon" data-rm-prev aria-label="Previous step">←</button>
+        <button type="button" class="rm-icon wide" data-rm-pause aria-label="Pause tour">Pause</button>
+        <button type="button" class="rm-icon" data-rm-next aria-label="Next step">→</button>
+      </div>
+      <button type="button" class="rm-exit" data-rm-exit>Exit · Esc</button>
+    </div>
+  </section>
+</div>
+
+<style>
+  .rm { position: fixed; inset: 0; z-index: 500; pointer-events: none; }
+
+  .rm-spot {
+    position: fixed; left: 0; top: 0; width: 0; height: 0; border-radius: 20px;
+    box-shadow: 0 0 0 1.5px var(--ember), 0 0 0 100vmax rgba(251, 250, 247, 0.9);
+    transition: box-shadow 0.6s var(--ease);
+  }
+  .rm[data-veil='dark'] .rm-spot {
+    box-shadow: 0 0 0 1.5px var(--amber), 0 0 0 100vmax rgba(12, 11, 14, 0.82);
+  }
+
+  .rm-card {
+    position: fixed; left: 0; right: 0; bottom: 22px; margin-inline: auto;
+    width: min(600px, calc(100vw - 28px));
+    padding: 20px 22px 16px; background: var(--card); color: var(--ink);
+    border: 1px solid var(--line); border-radius: 22px;
+    pointer-events: auto; outline: none;
+  }
+
+  /* On the dark finale the highlight sits low-left, so the card moves out of its way. */
+  @media (min-width: 900px) {
+    .rm[data-veil='dark'] .rm-card { left: auto; right: 28px; margin-inline: 0; }
+  }
+
+  .rm-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .rm-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.01em; }
+
+  .rm-title { font-size: clamp(24px, 3.4vw, 32px); font-weight: 500; letter-spacing: -0.03em; line-height: 1.1; margin-top: 14px; }
+  .rm-text { color: var(--ink-2); margin-top: 8px; font-size: 15px; line-height: 1.5; min-height: 3em; }
+
+  .rm-end { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .rm-btn {
+    display: inline-flex; align-items: center; height: 40px; padding-inline: 18px;
+    border: 1px solid var(--line); border-radius: 999px; font-size: 14px; font-weight: 500;
+    transition: all 0.3s var(--ease);
+  }
+  .rm-btn:hover { border-color: var(--ink); }
+  .rm-btn.primary { background: var(--ember); border-color: var(--ember); color: #fff; }
+  .rm-btn.primary:hover { filter: brightness(1.08); }
+
+  .rm-bar { height: 2px; background: var(--line); border-radius: 2px; margin-top: 16px; overflow: hidden; }
+  .rm-bar i { display: block; height: 100%; background: var(--ember); transform-origin: left; transform: scaleX(0); }
+
+  .rm-controls { margin-top: 12px; }
+  .rm-steps { display: flex; gap: 6px; }
+  .rm-icon {
+    min-width: 34px; height: 32px; padding-inline: 10px; border: 1px solid var(--line); border-radius: 999px;
+    font-size: 13px; transition: all 0.25s var(--ease);
+  }
+  .rm-icon.wide { min-width: 66px; }
+  .rm-icon:hover { border-color: var(--ink); }
+  .rm-exit { font-size: 12px; color: var(--ink-3); transition: color 0.25s var(--ease); }
+  .rm-exit:hover { color: var(--ink); }
+</style>

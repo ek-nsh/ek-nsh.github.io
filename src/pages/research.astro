@@ -1,0 +1,169 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import PageNext from '../components/PageNext.astro';
+import Sprite from '../components/Sprite.astro';
+import '../styles/figure.css';
+import { research } from '../data/research';
+import { profile } from '../data/profile';
+import { getPosts } from '../lib/posts';
+import { skyCoords } from '../lib/work';
+import type { SpriteName } from '../lib/sprites';
+
+const s = research.study;
+const posts = await getPosts();
+const interp = posts.find((p) => p.entry.id.includes('interpretability'));
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const c = skyCoords(5);
+const pad = (n: number) => String(n + 1).padStart(2, '0');
+const icons: SpriteName[] = ['commit', 'ledger', 'medal', 'shield'];
+---
+
+<Base title={`Research · ${profile.fullName}`} description={`${s.title}: ${s.subtitle}.`}>
+  <PageHead kicker="Questions" title="Research" lede={research.lede} />
+
+  <section class="block wrap rail-grid" id="study">
+    <p class="rail" data-reveal><span class="mono idx">01</span><span class="mono">Current study</span></p>
+    <div class="rail-body">
+      <p class="mono status-line" data-reveal><span class="pill-s">{s.status}</span>Research pipeline</p>
+      <h2 class="study-title" data-reveal>{s.title}</h2>
+      <p class="study-sub" data-reveal>{s.subtitle}</p>
+      <p class="study-q" data-reveal>{s.question}</p>
+      <div class="intro" data-reveal>
+        {s.intro.map((p) => <p>{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap fig-wrap" data-tour="research">
+    <figure class="fig" data-reveal>
+      <div class="plate live" data-plate-frame data-cursor-label="Move now">
+        <canvas
+          class="plate-art"
+          data-plate
+          data-live="true"
+          data-kind="cochange"
+          data-seed="5"
+          aria-label={`Interactive illustration for ${s.title}. ${s.figure}`}
+        ></canvas>
+        <i class="vf tl"></i><i class="vf tr"></i><i class="vf bl"></i><i class="vf br"></i>
+        <span class="vfm mono m-tl">Figure 1</span>
+        <span class="vfm mono m-tr">{c.ra} · {c.dec}</span>
+        <span class="vfm mono m-bl">Interactive</span>
+        <span class="vfm mono m-br" data-readout>x 0.50 · y 0.50</span>
+      </div>
+      <figcaption class="mono">{s.figure}</figcaption>
+    </figure>
+  </section>
+
+  <section class="block wrap rail-grid" id="pipeline">
+    <p class="rail" data-reveal><span class="mono idx">02</span><span class="mono">The pipeline</span></p>
+    <div class="rail-body">
+      <ol class="pipe" data-reveal>
+        {s.pipeline.map(([name, text], i) => (
+          <li>
+            <Sprite name={icons[i]} size={36} />
+            <p class="mono n">{pad(i)}</p>
+            <h3>{name}</h3>
+            <p>{text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="block wrap rail-grid" id="methods">
+    <p class="rail" data-reveal><span class="mono idx">03</span><span class="mono">Methods compared</span></p>
+    <div class="rail-body">
+      <ul class="rows" data-reveal>
+        {s.methods.map(([name, text], i) => (
+          <li><span class="mono n">{pad(i)}</span><h3>{name}</h3><p>{text}</p></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="block wrap rail-grid" id="evaluation">
+    <p class="rail" data-reveal><span class="mono idx">04</span><span class="mono">Evaluation</span></p>
+    <div class="rail-body">
+      <p class="eval-lead" data-reveal>A method is only as believable as the test it passed. The benchmark is built so the future cannot leak into a prediction.</p>
+      <ul class="rows" data-reveal>
+        {s.evaluation.map(([name, text], i) => (
+          <li><span class="mono n">{pad(i)}</span><h3>{name}</h3><p>{text}</p></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section class="block wrap rail-grid" id="where">
+    <p class="rail" data-reveal><span class="mono idx">05</span><span class="mono">Where</span></p>
+    <div class="rail-body">
+      <ul class="rows where" data-reveal>
+        {research.where.map((w) => (
+          <li><span class="mono n">{w.when}</span><h3>{w.who}</h3><p>{w.at}</p></li>
+        ))}
+      </ul>
+
+      {interp && (
+        <a class="adjacent" href={`${base}/writing/${interp.entry.id}`} data-cursor-label="Read" data-reveal>
+          <span class="mono">Adjacent question · writing</span>
+          <span class="adj-title">{interp.entry.data.title}</span>
+          <span class="adj-text">The same discipline pointed at language models: what a model computes versus what merely correlates with it. →</span>
+        </a>
+      )}
+    </div>
+  </section>
+
+  <PageNext from="/research" />
+</Base>
+
+<style>
+  .block { padding-top: clamp(56px, 8vw, 112px); }
+
+  .status-line { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; text-transform: none; }
+  .pill-s { padding: 3px 10px; border: 1px solid var(--ember); border-radius: 999px; color: var(--ember); letter-spacing: 0.02em; }
+  .study-title { font-size: clamp(40px, 6vw, 88px); font-weight: 300; letter-spacing: -0.045em; line-height: 1; }
+  .study-sub { margin-top: 16px; font-family: var(--font-serif); font-style: italic; font-size: clamp(19px, 1.8vw, 25px); line-height: 1.3; color: var(--ink-2); max-width: 30em; }
+  .study-q { margin-top: clamp(28px, 3vw, 44px); font-size: clamp(24px, 3vw, 42px); line-height: 1.2; letter-spacing: -0.03em; max-width: 22em; }
+  .intro { margin-top: clamp(24px, 3vw, 40px); display: grid; gap: 16px; color: var(--ink-2); font-size: 17px; line-height: 1.6; max-width: 40em; }
+
+  .fig-wrap { padding-top: clamp(40px, 6vw, 80px); }
+  .fig { margin: 0; }
+  .fig figcaption { margin-top: 12px; max-width: 80ch; text-transform: none; letter-spacing: 0.01em; line-height: 1.5; }
+
+  .pipe { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(16px, 2.4vw, 36px); }
+  .pipe li { position: relative; display: grid; gap: 8px; align-content: start; padding-top: 4px; }
+  .pipe li:not(:last-child)::after {
+    content: ''; position: absolute; top: 18px; left: 52px; right: calc(-1 * clamp(16px, 2.4vw, 36px) + 6px);
+    border-top: 1px dotted var(--ash);
+  }
+  .pipe :global(.sprite) { color: var(--ember); margin-bottom: 6px; }
+  .pipe h3 { font-size: 22px; font-weight: 500; letter-spacing: -0.03em; }
+  .pipe p:last-child { color: var(--ink-2); font-size: 14.5px; line-height: 1.5; }
+
+  .rows { border-top: 1px solid var(--ink); }
+  .rows li { display: grid; grid-template-columns: 48px minmax(0, 0.9fr) minmax(0, 1.6fr); gap: 8px 24px; align-items: baseline; padding: 20px 0; border-bottom: 1px solid var(--line); }
+  .rows .n { color: var(--ember); }
+  .rows h3 { font-size: 21px; font-weight: 500; letter-spacing: -0.025em; }
+  .rows p { color: var(--ink-2); font-size: 15.5px; line-height: 1.5; }
+  .rows.where li { grid-template-columns: 150px minmax(0, 1.2fr) minmax(0, 1.4fr); }
+  .rows.where .n { text-transform: none; letter-spacing: 0.01em; color: var(--ink-3); }
+
+  .eval-lead { font-size: clamp(22px, 2.4vw, 32px); line-height: 1.25; letter-spacing: -0.03em; max-width: 24em; margin-bottom: clamp(24px, 3vw, 40px); }
+
+  .adjacent {
+    display: grid; gap: 8px; margin-top: clamp(36px, 5vw, 64px); padding: 24px 0 0; border-top: 1px solid var(--line);
+    transition: color 0.3s var(--ease);
+  }
+  .adj-title { font-family: var(--font-serif); font-size: clamp(26px, 3vw, 40px); font-weight: 500; letter-spacing: -0.02em; line-height: 1.1; }
+  .adj-text { color: var(--ink-2); max-width: 44em; }
+  .adjacent:hover .adj-title { color: var(--ember); }
+
+  @media (max-width: 860px) {
+    .pipe { grid-template-columns: 1fr 1fr; row-gap: 36px; }
+    .pipe li::after { display: none; }
+    .rows li, .rows.where li { grid-template-columns: 36px 1fr; }
+    .rows li p { grid-column: 2; }
+  }
+  @media (max-width: 520px) { .pipe { grid-template-columns: 1fr; } }
+</style>

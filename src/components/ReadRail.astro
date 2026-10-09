@@ -1,0 +1,46 @@
+---
+interface Props {
+  headings: { depth: number; slug: string; text: string }[];
+}
+
+const items = Astro.props.headings.filter((h) => h.depth === 2);
+---
+
+<!-- A quiet rail of ticks in the right margin: one per section, the current one longer and warm. -->
+{items.length > 2 && (
+  <nav class="read-rail" data-rail aria-label="Sections in this post">
+    <ol>
+      {items.map((h) => (
+        <li><a href={`#${h.slug}`} data-rail-link data-slug={h.slug}><span class="r-text">{h.text}</span><i class="r-tick" aria-hidden="true"></i></a></li>
+      ))}
+    </ol>
+  </nav>
+)}
+
+<style>
+  .read-rail { display: none; }
+
+  @media (min-width: 1180px) {
+    .read-rail {
+      display: block; position: fixed; z-index: 20; top: 50%; transform: translateY(-50%);
+      right: max(12px, calc((100vw - 1090px) / 2 - 34px));
+    }
+    ol { display: grid; gap: 4px; }
+    a { display: flex; align-items: center; justify-content: flex-end; gap: 10px; height: 18px; color: var(--ink-3); }
+    .r-text {
+      font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+      padding: 2px 8px; background: var(--bg); color: var(--ink-2);
+      opacity: 0; transform: translateX(6px); pointer-events: none;
+      transition: opacity 0.25s var(--ease), transform 0.3s var(--ease);
+    }
+    .r-tick { display: block; width: 12px; height: 1px; background: var(--ash); transition: width 0.35s var(--ease), background-color 0.3s var(--ease), height 0.2s; }
+    ol:hover .r-text { opacity: 0; }
+    a:hover .r-text, a:focus-visible .r-text { opacity: 1; transform: none; }
+    a:hover .r-tick, a:focus-visible .r-tick { width: 24px; background: var(--ember); }
+
+    a.is-passed .r-tick { background: var(--ink); }
+    a.is-active .r-tick { width: 26px; height: 2px; background: var(--ember); }
+    a.is-active .r-text { opacity: 1; transform: none; color: var(--ink); }
+    ol:hover a.is-active:not(:hover) .r-text { opacity: 0; }
+  }
+</style>

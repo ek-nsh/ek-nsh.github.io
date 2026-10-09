@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.env
+.env.*
+tests/e2e/shots/
+
+# Local-only: the working notes (full conversation log) and the desktop app's launch config.
+docs/
+.claude/

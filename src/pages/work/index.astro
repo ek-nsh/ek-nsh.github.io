@@ -1,0 +1,248 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import PageNext from '../../components/PageNext.astro';
+import Sprite from '../../components/Sprite.astro';
+import { getWork, missionNo } from '../../lib/work';
+import { bench } from '../../data/bench';
+import { threads } from '../../data/threads';
+import { research } from '../../data/research';
+import { profile } from '../../data/profile';
+import type { SpriteName } from '../../lib/sprites';
+
+const projects = await getWork();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+interface Star {
+  id: string;
+  kind: 'major' | 'research' | 'minor';
+  title: string;
+  sub: string;
+  text: string;
+  sprite: SpriteName;
+  pos: [number, number];
+  threads: string[];
+  href?: string;
+  status?: string;
+}
+
+const stars: Star[] = [
+  ...projects.map((p) => ({
+    id: p.id, kind: 'major' as const, title: p.data.title, sub: `Mission ${missionNo(p.data.order)}`, text: p.data.question,
+    sprite: p.data.sprite, pos: p.data.pos, threads: p.data.threads as string[], href: `${base}/work/${p.id}`, status: p.data.status,
+  })),
+  {
+    id: 'change-impact', kind: 'research', title: research.study.title, sub: 'Research', text: research.study.question,
+    sprite: 'commit', pos: [40, 20], threads: ['graphs', 'shows-work'], href: `${base}/research`, status: research.study.status,
+  },
+  ...bench.map((b) => ({
+    id: b.id, kind: 'minor' as const, title: b.title, sub: 'Smaller body', text: b.text, sprite: b.sprite, pos: b.pos, threads: b.threads as string[],
+  })),
+];
+
+const hours = ['00h', '03h', '06h', '09h', '12h', '15h', '18h', '21h'];
+const decs = ['+30°', '0°', '−30°', '−60°'];
+---
+
+<Base title={`Work · ${profile.fullName}`} description="Four builds and a research line, drawn as a star chart: a distributed LLM fleet, a causal finance engine, an Android app and an EV route planner.">
+  <PageHead
+    kicker="Missions"
+    title="Work"
+    lede="What I have built, drawn as a sky. Bigger stars have a page of their own; dotted lines join projects that share an idea."
+  />
+
+  <section class="chart-wrap wrap" aria-label="Star chart of projects">
+    <div class="chart" data-chart>
+      {hours.map((h, i) => <span class="tick tx mono" style={`left:${i * 12.5}%`} aria-hidden="true">{h}</span>)}
+      {decs.map((d, i) => <span class="tick ty mono" style={`top:${(i + 1) * 20}%`} aria-hidden="true">{d}</span>)}
+      <svg class="links" data-links aria-hidden="true"></svg>
+
+      {stars.map((n, i) => {
+        const Tag = n.href ? 'a' : 'button';
+        return (
+          <Tag
+            class:list={['star', n.kind]}
+            style={`--x:${n.pos[0]}%;--y:${n.pos[1]}%;--d:${-(i * 0.9).toFixed(1)}s`}
+            href={n.href}
+            type={n.href ? undefined : 'button'}
+            data-star
+            data-id={n.id}
+            data-threads={n.threads.join(' ')}
+            data-title={n.title}
+            data-sub={n.sub}
+            data-text={n.text}
+            data-status={n.status ?? ''}
+            data-href={n.href ?? ''}
+            data-cursor-lock={n.kind === 'minor' ? undefined : ''}
+            data-cursor-label={n.kind === 'minor' ? 'Peek' : 'Open'}
+          >
+            <Sprite name={n.sprite} size={n.kind === 'minor' ? 24 : 36} />
+            <span class="s-name">{n.title}</span>
+            {n.kind !== 'minor' && <span class="mono s-sub">{n.sub}</span>}
+          </Tag>
+        );
+      })}
+    </div>
+
+    <div class="readout" data-readout aria-live="polite">
+      <p class="mono r-kicker" data-r-kicker>Hover a star</p>
+      <p class="r-title" data-r-title>The work, as a sky.</p>
+      <p class="r-text" data-r-text>Bigger stars open a full story. Smaller ones are course work and school experiments. Pick an idea below to see which projects share it.</p>
+      <span class="r-open" data-r-open hidden>Open →</span>
+    </div>
+
+    <ul class="threads" role="list" aria-label="Ideas that run through the work">
+      {threads.map((t) => (
+        <li>
+          <button class="thread" type="button" data-thread={t.id} aria-pressed="false">
+            <span class="t-label"><i class="t-dot" aria-hidden="true"></i>{t.label}</span>
+            <span class="t-text">{t.text}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="catalogue wrap" aria-label="Catalogue">
+    <h2 class="mono"><span>●</span>Catalogue</h2>
+    <ol>
+      {projects.map((p) => (
+        <li>
+          <a class="cat-row" href={`${base}/work/${p.id}`} data-cursor-label="Open">
+            <span class="mono n">{missionNo(p.data.order)}</span>
+            <span class="c-main">
+              <span class="c-title">{p.data.title}</span>
+              <span class="c-sub">{p.data.subtitle}</span>
+            </span>
+            <span class="mono c-area">{p.data.area}</span>
+            <span class="mono c-status">{p.data.status}</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      ))}
+      <li>
+        <a class="cat-row" href={`${base}/research`} data-cursor-label="Open">
+          <span class="mono n">R</span>
+          <span class="c-main">
+            <span class="c-title">{research.study.title}</span>
+            <span class="c-sub">Research pipeline for co-change prediction</span>
+          </span>
+          <span class="mono c-area">Research · Software engineering</span>
+          <span class="mono c-status">{research.study.status}</span>
+          <span class="arrow" aria-hidden="true">→</span>
+        </a>
+      </li>
+    </ol>
+
+    <h2 class="mono minor-head"><span>●</span>Smaller bodies</h2>
+    <ul class="minors">
+      {bench.map((b) => (
+        <li>
+          <Sprite name={b.sprite} size={27} />
+          <div>
+            <p class="m-title">{b.title}</p>
+            <p class="m-text">{b.text}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <PageNext from="/work" />
+</Base>
+
+<style>
+  .chart-wrap { padding-top: clamp(36px, 5vw, 64px); }
+
+  /* ---- The chart: a paper star atlas with a hairline RA / Dec grid ---- */
+  .chart {
+    position: relative; aspect-ratio: 16 / 8.6; min-height: 440px;
+    border: 1px solid var(--line); background-color: var(--card);
+    background-image: linear-gradient(to right, var(--wash) 1px, transparent 1px), linear-gradient(to bottom, var(--wash) 1px, transparent 1px);
+    background-size: 12.5% 100%, 100% 20%;
+    overflow: hidden;
+  }
+  .tick { position: absolute; font-size: 9.5px; color: var(--ink-3); pointer-events: none; }
+  .tx { top: 8px; margin-left: 6px; }
+  .ty { left: 8px; margin-top: 4px; }
+  .links { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .links :global(.link) { fill: none; stroke: var(--ash); stroke-width: 1; stroke-dasharray: 1 6; stroke-linecap: round; opacity: 0.55; transition: opacity 0.4s var(--ease), stroke 0.3s var(--ease); }
+  .links :global(.link.is-on) { stroke: var(--ember); stroke-dasharray: 2 5; opacity: 1; }
+  .links :global(.link.is-off) { opacity: 0.07; }
+  .links :global(.ecliptic) { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 7; }
+  .links :global(.ecl-label) { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; fill: var(--ink-3); }
+
+  .star {
+    position: absolute; left: var(--x); top: var(--y); translate: -50% -50%;
+    display: grid; justify-items: center; gap: 6px; padding: 14px 16px; max-width: 190px;
+    text-align: center; color: var(--ink);
+    transition: opacity 0.4s var(--ease), color 0.3s var(--ease);
+  }
+  .star :global(.sprite) { animation: twinkle 4.2s steps(1) infinite; animation-delay: var(--d, 0s); }
+  .star.research { color: var(--amber); }
+  .star.minor { color: var(--ash); padding: 8px 10px; max-width: 150px; }
+  .s-name { font-size: 14px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.2; color: var(--ink); }
+  .star.minor .s-name { font-size: 12px; font-weight: 400; color: var(--ink-2); }
+  .s-sub { font-size: 10px; }
+  .star:hover, .star:focus-visible { color: var(--ember); }
+  .star:hover .s-name, .star:focus-visible .s-name { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+  .star.is-off { opacity: 0.22; }
+  @keyframes twinkle { 0% { opacity: 1; } 55% { opacity: 0.45; } 60% { opacity: 1; } }
+
+  /* ---- Readout ---- */
+  .readout {
+    display: grid; grid-template-columns: 200px 1fr; gap: 6px 28px; align-items: baseline;
+    padding: 20px 0; border-bottom: 1px solid var(--line); min-height: 112px; position: relative;
+  }
+  .r-kicker { grid-row: 1 / span 2; padding-top: 4px; }
+  .r-title { font-size: clamp(22px, 2.2vw, 30px); letter-spacing: -0.03em; line-height: 1.15; }
+  .r-text { color: var(--ink-2); font-size: 15px; line-height: 1.5; max-width: 62ch; }
+  .r-open { position: absolute; right: 0; top: 20px; font-size: 14px; font-weight: 500; color: var(--ember); }
+
+  /* ---- Threads ---- */
+  .threads { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(16px, 3vw, 40px); padding-top: 22px; }
+  .thread { display: grid; gap: 6px; text-align: left; width: 100%; padding: 4px 0 4px; color: var(--ink-3); transition: color 0.3s var(--ease); }
+  .t-label { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 500; letter-spacing: -0.01em; color: var(--ink-2); transition: color 0.3s var(--ease); }
+  .t-dot { width: 18px; height: 0; border-top: 1px dotted var(--ash); transition: border-color 0.3s var(--ease); }
+  .t-text { font-size: 13.5px; line-height: 1.45; padding-left: 28px; }
+  .thread:hover .t-label, .thread.is-on .t-label, .thread[aria-pressed='true'] .t-label { color: var(--ember); }
+  .thread:hover .t-dot, .thread.is-on .t-dot, .thread[aria-pressed='true'] .t-dot { border-top: 2px solid var(--ember); }
+
+  /* ---- Catalogue ---- */
+  .catalogue { padding-top: clamp(56px, 8vw, 110px); }
+  .catalogue h2 { display: flex; gap: 12px; align-items: center; padding-bottom: 12px; border-bottom: 1px solid var(--ink); }
+  .catalogue h2 span { color: var(--ember); font-size: 8px; }
+  .cat-row {
+    position: relative; isolation: isolate;
+    display: grid; grid-template-columns: 44px minmax(0, 2.6fr) minmax(0, 1.6fr) 96px 28px; gap: 12px 24px; align-items: baseline;
+    padding: clamp(18px, 2.4vw, 28px) 10px; border-bottom: 1px solid var(--line);
+  }
+  .cat-row::before { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--wash); opacity: 0; transition: opacity 0.4s var(--ease); }
+  .cat-row:hover::before { opacity: 1; }
+  .n { color: var(--ember); }
+  .c-main { display: grid; gap: 4px; }
+  .c-title { font-size: clamp(22px, 2.4vw, 32px); font-weight: 500; letter-spacing: -0.03em; line-height: 1.1; }
+  .c-sub { color: var(--ink-2); font-size: 15px; }
+  .c-area, .c-status { text-transform: none; letter-spacing: 0.01em; }
+  .c-status { text-align: right; }
+  .arrow { font-size: 20px; transition: transform 0.4s var(--ease), color 0.4s var(--ease); }
+  .cat-row:hover .arrow { transform: translateX(5px); color: var(--ember); }
+
+  .minor-head { margin-top: clamp(48px, 7vw, 90px); }
+  .minors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 clamp(24px, 4vw, 64px); }
+  .minors li { display: grid; grid-template-columns: 27px 1fr; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--line); color: var(--ash); }
+  .m-title { font-size: 17px; font-weight: 500; letter-spacing: -0.015em; color: var(--ink); }
+  .m-text { margin-top: 4px; font-size: 14.5px; line-height: 1.5; color: var(--ink-2); max-width: 52ch; }
+
+  /* Narrow screens: the chart would crowd its own labels, so the catalogue does the work. */
+  @media (max-width: 980px) {
+    .chart, .readout, .threads { display: none; }
+    .catalogue { padding-top: clamp(36px, 8vw, 56px); }
+  }
+  @media (max-width: 860px) {
+    .cat-row { grid-template-columns: 30px 1fr 24px; }
+    .c-area, .c-status { grid-column: 2; text-align: left; }
+    .arrow { grid-row: 1; grid-column: 3; }
+    .minors { grid-template-columns: 1fr; }
+  }
+</style>

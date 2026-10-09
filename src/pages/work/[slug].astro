@@ -1,0 +1,87 @@
+---
+import { render } from 'astro:content';
+import '../../styles/post.css';
+import '../../styles/figure.css';
+import '../../styles/project.css';
+import Base from '../../layouts/Base.astro';
+import Sprite from '../../components/Sprite.astro';
+import { getWork, missionNo, skyCoords } from '../../lib/work';
+import { profile } from '../../data/profile';
+
+export async function getStaticPaths() {
+  const all = await getWork();
+  return all.map((entry, i) => ({ params: { slug: entry.id }, props: { entry, prev: all[i - 1] ?? null, next: all[i + 1] ?? null } }));
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const d = entry.data;
+const c = skyCoords(d.seed);
+
+/** What the cursor says over each figure. */
+const hint: Record<string, string> = { hive: 'Drop a node', ledger: 'Decide', orbit: 'Save', route: 'Compare', cochange: 'Move now' };
+---
+
+<Base title={`${d.title} · ${profile.fullName}`} description={`${d.subtitle}. ${d.answer}`}>
+  <article class="post proj">
+    <header class="post-head proj-head">
+      <a class="back mono" href={`${base}/work`}>← Work</a>
+      <p class="mono kicker"><Sprite name={d.sprite} size={18} />Mission {missionNo(d.order)} · {d.area}</p>
+      <h1>{d.title}</h1>
+      <p class="proj-sub">{d.subtitle}</p>
+
+      <dl class="brief">
+        <div><dt class="mono">The question</dt><dd class="q">{d.question}</dd></div>
+        <div><dt class="mono">The answer</dt><dd>{d.answer}</dd></div>
+        <div class="facts"><dt class="mono">Status</dt><dd><span class="mono status">{d.status}</span></dd></div>
+      </dl>
+    </header>
+
+    <figure class="fig">
+      <div class="plate live" data-plate-frame data-cursor-label={hint[d.kind]}>
+        <canvas
+          class="plate-art"
+          data-plate
+          data-live="true"
+          data-kind={d.kind}
+          data-seed={d.seed}
+          aria-label={`Interactive illustration for ${d.title}. ${d.caption}`}
+        ></canvas>
+        <i class="vf tl"></i><i class="vf tr"></i><i class="vf bl"></i><i class="vf br"></i>
+        <span class="vfm mono m-tl">Figure 1</span>
+        <span class="vfm mono m-tr">{c.ra} · {c.dec}</span>
+        <span class="vfm mono m-bl">Interactive</span>
+        <span class="vfm mono m-br" data-readout>x 0.50 · y 0.50</span>
+      </div>
+      <figcaption class="mono">{d.caption}</figcaption>
+    </figure>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <aside class="proj-end">
+      <p class="lead">Want the details, a demo or the code? <a href={`mailto:${profile.email}`}>Say hello</a>.</p>
+      <nav class="mission-nav" aria-label="Other missions">
+        {prev ? (
+          <a class="prev" href={`${base}/work/${prev.id}`} data-cursor-label="Back">
+            <span class="mono">← Mission {missionNo(prev.data.order)}</span>
+            <span class="big"><Sprite name={prev.data.sprite} size={27} />{prev.data.title}</span>
+          </a>
+        ) : <span></span>}
+        {next ? (
+          <a class="next" href={`${base}/work/${next.id}`} data-cursor-label="Next">
+            <span class="mono">Mission {missionNo(next.data.order)} →</span>
+            <span class="big">{next.data.title}<Sprite name={next.data.sprite} size={27} /></span>
+          </a>
+        ) : (
+          <a class="next" href={`${base}/research`} data-cursor-label="Next">
+            <span class="mono">Next →</span>
+            <span class="big">Research<Sprite name="commit" size={27} /></span>
+          </a>
+        )}
+      </nav>
+    </aside>
+  </article>
+</Base>

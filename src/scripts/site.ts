@@ -1,0 +1,42 @@
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { initLenis } from './lenis';
+import { initChrome } from './chrome';
+import { initCursor } from './cursor';
+import { initReveals } from './reveal';
+import { initHero } from './hero';
+import { initTrajectory } from './trajectory';
+import { initTimeline } from './timeline';
+import { initChart } from './chart';
+import { initRail } from './rail';
+import { initReel } from './reel';
+import { initPlates } from './plates';
+import { initDesk } from './desk';
+import { initFinale } from './finale';
+import { initTour } from './tour';
+import { initSidenotes } from './sidenotes';
+import { initNuances } from './nuances';
+import { initDiscoveries } from './discoveries';
+import { initComet } from './comet';
+
+initLenis();
+initChrome();
+initCursor();
+initReveals();
+initHero();
+initTrajectory();
+initTimeline();
+initChart();
+initRail();
+initReel();
+initPlates();
+initDesk();
+initFinale();
+initTour();
+initSidenotes();
+initNuances();
+initDiscoveries();
+initComet();
+
+// Fonts and images change layout: re-measure every scroll trigger once they settle.
+document.fonts?.ready.then(() => ScrollTrigger.refresh());
+window.addEventListener('load', () => ScrollTrigger.refresh());

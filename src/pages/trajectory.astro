@@ -1,0 +1,153 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import PageNext from '../components/PageNext.astro';
+import Sprite from '../components/Sprite.astro';
+import { lead, stages, education, crews, talks } from '../data/trajectory';
+import { profile } from '../data/profile';
+
+const pad = (n: number) => String(n).padStart(2, '0');
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<Base title={`Trajectory · ${profile.fullName}`} description="School olympiads, a CS degree, lectures and the projects since: a flight path rather than a résumé.">
+  <PageHead kicker="Flight path" title="Trajectory" lede={lead} />
+
+  <section class="flight wrap" data-flight>
+    <!-- Mission telemetry: it follows you down the path and always says which stage you are in. -->
+    <aside class="tele" aria-hidden="true">
+      <div class="tele-card">
+        <p class="mono tele-n">Stage <b data-tele-n>01</b> / {pad(stages.length)}</p>
+        <div class="tele-art">
+          {stages.map((s, i) => (
+            <span class="tele-sprite" data-tele-sprite={i}><Sprite name={s.sprite} size={108} /></span>
+          ))}
+        </div>
+        <p class="mono tele-when" data-tele-when>{stages[0].when}</p>
+        <p class="tele-title" data-tele-title>{stages[0].title}</p>
+      </div>
+    </aside>
+
+    <div class="stages-wrap">
+      <i class="line" aria-hidden="true"><b data-flight-fill></b></i>
+      <ol class="stages">
+        {stages.map((s, i) => (
+          <li class:list={['stage', { 'is-now': s.now }]} data-stage data-when={s.when} data-title={s.title}>
+            <span class="s-dot" data-dot aria-hidden="true"></span>
+            <p class="mono when"><Sprite name={s.sprite} size={18} />{s.when}</p>
+            <h2>{s.title}</h2>
+            <p class="s-text">{s.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="record wrap" aria-label="The record behind the path">
+    <div class="rec-col" data-reveal>
+      <h2 class="mono"><span>01</span>Home bases</h2>
+      <ul>
+        {education.map((e) => (
+          <li>
+            <p class="r-main">{e.what}</p>
+            <p class="mono r-sub">{e.place} · {e.when}</p>
+            {e.note && <p class="r-note">{e.note}</p>}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="rec-col" data-reveal>
+      <h2 class="mono"><span>02</span>Clubs &amp; crews</h2>
+      <ul>
+        {crews.map((c) => (
+          <li>
+            <p class="r-main">{c.role}</p>
+            <p class="mono r-sub">{c.where} · {c.when}</p>
+            {c.text && <p class="r-note">{c.text}</p>}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div class="rec-col" data-reveal>
+      <h2 class="mono"><span>03</span>From the lectern</h2>
+      <ul>
+        {talks.map((t) => (
+          <li>
+            <p class="r-main">{t.title}</p>
+            <p class="mono r-sub">{t.where}</p>
+            <p class="r-note">{t.text}</p>
+          </li>
+        ))}
+      </ul>
+      <p class="aside" data-reveal>Chess has its own corner in <a href={`${base}/lab`}>the Lab</a>.</p>
+    </div>
+  </section>
+
+  <PageNext from="/trajectory" />
+</Base>
+
+<style>
+  /* ---- The flight ---- */
+  .flight { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: clamp(32px, 6vw, 96px); padding-top: clamp(48px, 7vw, 96px); }
+
+  .tele { position: relative; }
+  .tele-card {
+    position: sticky; top: calc(var(--header-h) + 14vh);
+    display: grid; gap: 12px; padding: 22px; max-width: 320px;
+    border: 1px solid var(--line); background: var(--card);
+  }
+  .tele-n b { color: var(--ember); font-weight: 400; }
+  .tele-art { position: relative; height: 108px; margin: 6px 0 4px; }
+  .tele-sprite { position: absolute; inset: 0; color: var(--ink); opacity: 0; transition: opacity 0.35s steps(3); }
+  .tele-sprite.is-on { opacity: 1; }
+  .tele-title { font-size: 24px; letter-spacing: -0.03em; line-height: 1.15; min-height: 2.3em; }
+
+  .stages-wrap { position: relative; padding-left: clamp(36px, 5vw, 64px); }
+  .line { position: absolute; left: 5px; top: 8px; bottom: 0; width: 1px; background: var(--line); }
+  .line b {
+    position: absolute; inset: 0; margin: 0;
+    background: linear-gradient(var(--ash), var(--amber) 55%, var(--ember));
+    clip-path: inset(0 0 calc((1 - var(--p, 0)) * 100%) 0);
+  }
+
+  .stage { position: relative; padding-bottom: clamp(72px, 16vh, 168px); }
+  .stage:last-child { padding-bottom: clamp(24px, 6vh, 64px); }
+  .s-dot {
+    position: absolute; left: calc(-1 * clamp(36px, 5vw, 64px)); top: 4px;
+    width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 1.5px solid var(--ash);
+    transition: background-color 0.5s var(--ease), border-color 0.5s var(--ease), scale 0.4s var(--ease);
+  }
+  .s-dot.is-lit { background: var(--c, var(--ember)); border-color: var(--c, var(--ember)); }
+  .is-now .s-dot.is-lit { animation: now-ring 2.8s ease-out infinite; }
+  @keyframes now-ring {
+    0% { box-shadow: 0 0 0 0 rgba(232, 83, 47, 0.4); }
+    70%, 100% { box-shadow: 0 0 0 12px rgba(232, 83, 47, 0); }
+  }
+
+  .when { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .when :global(.sprite) { color: var(--ink); display: none; }
+  .is-now .when { color: var(--ember); }
+  .stage h2 { font-size: clamp(28px, 3.4vw, 50px); font-weight: 400; letter-spacing: -0.04em; line-height: 1.05; margin-bottom: 16px; }
+  .s-text { font-size: clamp(16px, 1.3vw, 19px); line-height: 1.55; color: var(--ink-2); max-width: 34em; }
+
+  /* ---- The record ---- */
+  .record { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 4vw, 64px); padding-top: clamp(48px, 8vw, 112px); }
+  .rec-col h2 { display: flex; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--ink); margin-bottom: 4px; }
+  .rec-col h2 span { color: var(--ember); }
+  .rec-col li { padding: 16px 0; border-bottom: 1px solid var(--line); display: grid; gap: 4px; }
+  .r-main { font-size: 17px; font-weight: 500; letter-spacing: -0.015em; line-height: 1.3; }
+  .r-sub { text-transform: none; letter-spacing: 0.01em; }
+  .r-note { color: var(--ink-2); font-size: 14.5px; line-height: 1.5; margin-top: 4px; }
+  .aside { margin-top: 18px; color: var(--ink-2); font-size: 15px; }
+  .aside a { color: var(--ember); border-bottom: 1px solid currentColor; }
+
+  @media (max-width: 960px) { .record { grid-template-columns: 1fr; } }
+  @media (max-width: 860px) {
+    .flight { grid-template-columns: 1fr; }
+    .tele { display: none; }
+    .when :global(.sprite) { display: inline-block; }
+    .stage { padding-bottom: 56px; }
+  }
+</style>

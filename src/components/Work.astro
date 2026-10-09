@@ -1,0 +1,139 @@
+---
+import '../styles/figure.css';
+import { getWork, missionNo, skyCoords } from '../lib/work';
+
+const projects = await getWork();
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const pad = (n: number) => String(n + 1).padStart(2, '0');
+---
+
+<section class="section" id="work">
+  <div class="wrap rail-grid">
+    <p class="rail" data-reveal><span class="mono idx">03</span><span class="mono">Selected work</span></p>
+
+    <div class="rail-body">
+      <!-- Hover or tap a title and its mission takes the stage. Left alone, the reel advances by itself. -->
+      <div class="reel" data-reel data-reveal>
+        <div class="index">
+          <ol class="reel-list">
+            {projects.map((p, i) => (
+              <li>
+                <button
+                  class="reel-item"
+                  type="button"
+                  data-reel-item
+                  aria-controls={`reel-card-${i}`}
+                  aria-current={i === 0 ? 'true' : 'false'}
+                >
+                  <span class="mono n">{pad(i)}</span>
+                  <span class="name">{p.data.title}</span>
+                  <span class="mono cat">{p.data.status}</span>
+                  <i class="bar" aria-hidden="true"></i>
+                </button>
+              </li>
+            ))}
+          </ol>
+          <a class="all" href={`${base}/work`} data-cursor-label="Open">All work <i aria-hidden="true">→</i></a>
+        </div>
+
+        <div class="stage" data-tour="work" aria-live="polite">
+          {projects.map((p, i) => {
+            const c = skyCoords(p.data.seed);
+            return (
+              <article class="mission" id={`reel-card-${i}`} data-reel-card data-active={i === 0 ? '' : undefined}>
+                <!-- The plate: a viewfinder with a small living picture of the project. -->
+                <div class="plate" data-plate-frame>
+                  <canvas class="plate-art" data-plate data-kind={p.data.kind} data-seed={p.data.seed} aria-hidden="true"></canvas>
+                  <i class="vf tl"></i><i class="vf tr"></i><i class="vf bl"></i><i class="vf br"></i>
+                  <i class="xh h"></i><i class="xh v"></i>
+                  <span class="vfm mono m-tl">Mission {missionNo(p.data.order)}</span>
+                  <span class="vfm mono m-tr">{c.ra} · {c.dec}</span>
+                  <span class="vfm mono m-bl">{p.data.area.split(' · ')[0]}</span>
+                  <span class="vfm mono m-br" data-readout>x 0.50 · y 0.50</span>
+                </div>
+
+                <div class="body">
+                  <div class="q">
+                    <h3>{p.data.question}</h3>
+                    <p>{p.data.answer}</p>
+                  </div>
+                  <ol class="log" aria-label="Key points">
+                    {p.data.beats.map(([t, text]) => (
+                      <li><span class="mono">{t}</span><span>{text}</span></li>
+                    ))}
+                  </ol>
+                </div>
+
+                <a class="open" href={`${base}/work/${p.id}`} data-cursor-label="Open">Open the full story <i aria-hidden="true">→</i></a>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .reel { --t: 6s; display: grid; grid-template-columns: minmax(0, 4.4fr) minmax(0, 7.6fr); gap: clamp(24px, 4vw, 64px); align-items: start; }
+
+  /* ---- Index ---- */
+  .reel-list { border-top: 1px solid var(--line); }
+  .reel-item {
+    position: relative; display: grid; grid-template-columns: 34px 1fr auto; align-items: baseline; gap: 0 10px;
+    width: 100%; padding: 17px 0; text-align: left;
+    border-bottom: 1px solid var(--line); color: var(--ink-3);
+    transition: color 0.4s var(--ease), padding-left 0.5s var(--ease);
+  }
+  .reel-item:hover { color: var(--ink-2); }
+  .reel-item[aria-current='true'] { color: var(--ink); padding-left: 10px; }
+  .name { font-size: clamp(24px, 2.7vw, 40px); font-weight: 400; letter-spacing: -0.035em; line-height: 1.1; }
+  .n { color: inherit; opacity: 0.7; }
+  .reel-item[aria-current='true'] .n { color: var(--ember); opacity: 1; }
+
+  /* The hairline under the active title fills over the dwell time, then the reel moves on. */
+  .bar {
+    position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--ember);
+    transform-origin: left; transform: scaleX(0);
+  }
+  .reel-item[aria-current='true'] .bar { animation: fill var(--t) linear forwards; }
+  .reel.is-paused .bar { animation-play-state: paused; }
+  .reel.no-cycle .reel-item[aria-current='true'] .bar { animation: none; transform: scaleX(1); }
+  @keyframes fill { to { transform: scaleX(1); } }
+
+  /* ---- Stage: every mission shares one grid cell, so the stage never changes height ---- */
+  .stage { display: grid; }
+  .mission {
+    grid-area: 1 / 1; display: grid; align-content: start; gap: 22px;
+    opacity: 0; visibility: hidden; transform: translateY(14px);
+    transition: opacity 0.5s var(--ease), transform 0.7s var(--ease), visibility 0s 0.5s;
+  }
+  .mission[data-active] { opacity: 1; visibility: visible; transform: none; transition-delay: 0s; }
+
+  /* The plate itself (a viewfinder, not a card) is styled in src/styles/figure.css. */
+  .body { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px 36px; }
+  .q h3 {
+    font-family: var(--font-serif); font-style: italic; font-weight: 400;
+    font-size: clamp(22px, 2.1vw, 29px); line-height: 1.22; letter-spacing: -0.012em;
+  }
+  .q p { margin-top: 12px; color: var(--ink-2); font-size: 15px; line-height: 1.55; max-width: 44ch; }
+
+  .log { display: grid; gap: 10px; align-content: start; padding-top: 6px; }
+  .log li { display: grid; grid-template-columns: 52px 1fr; gap: 10px; font-size: 13.5px; line-height: 1.4; color: var(--ink-2); }
+  .log .mono { color: var(--ember); padding-top: 1px; }
+
+  .open { justify-self: start; display: inline-flex; gap: 8px; font-size: 14px; font-weight: 500; border-bottom: 1px solid currentColor; padding-bottom: 2px; transition: color 0.3s var(--ease); }
+  .open i { font-style: normal; transition: transform 0.4s var(--ease); }
+  .open:hover { color: var(--ember); }
+  .open:hover i { transform: translateX(4px); }
+
+  .all { display: inline-flex; gap: 8px; margin-top: 22px; font-size: 14px; font-weight: 500; border-bottom: 1px solid currentColor; padding-bottom: 2px; transition: color 0.3s var(--ease); }
+  .all i { font-style: normal; transition: transform 0.4s var(--ease); }
+  .all:hover { color: var(--ember); }
+  .all:hover i { transform: translateX(4px); }
+
+  @media (max-width: 860px) {
+    .reel { grid-template-columns: 1fr; gap: 28px; }
+    .body { grid-template-columns: 1fr; }
+  }
+</style>

@@ -1,0 +1,16 @@
+{
+  "url": "http://localhost:4322/",
+  "width": 1440,
+  "height": 900,
+  "initialWait": 6500,
+  "steps": [
+    { "name": "home-01-hero", "wait": 200 },
+    { "name": "home-02-core", "mouse": [1210, 414], "wait": 1000 },
+    { "name": "home-03-trajectory", "scroll": "#trajectory", "offset": -80, "wait": 4500 },
+    { "name": "home-04-work", "scroll": "#work", "offset": -80, "wait": 3000 },
+    { "name": "home-05-notes", "scroll": "#notes", "offset": -80, "wait": 4500 },
+    { "name": "home-06-dot", "eval": "window.scrollTo({ top: document.documentElement.scrollHeight - innerHeight - 0.97 * innerHeight, behavior: 'instant' }); 1", "wait": 1800 },
+    { "name": "home-07-iris", "eval": "window.scrollTo({ top: document.documentElement.scrollHeight - innerHeight - 0.5 * innerHeight, behavior: 'instant' }); 1", "wait": 2200 },
+    { "name": "home-08-finale", "eval": "window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }); 1", "wait": 2500 }
+  ]
+}

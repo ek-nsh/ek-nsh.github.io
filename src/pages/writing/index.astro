@@ -1,0 +1,26 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHead from '../../components/PageHead.astro';
+import PageNext from '../../components/PageNext.astro';
+import PostList from '../../components/PostList.astro';
+import { getPosts } from '../../lib/posts';
+import { profile } from '../../data/profile';
+
+const posts = await getPosts();
+---
+
+<Base title={`Writing · ${profile.fullName}`} description="Long-form notes on how models work, what it means to know something, and the things I'm trying to understand properly.">
+  <PageHead
+    kicker="Notes"
+    title="Writing"
+    lede="Long-form notes on how models work, what it means to know something, and the things I'm trying to understand properly."
+  />
+  <section class="wrap list" data-reveal>
+    <PostList posts={posts} />
+  </section>
+  <PageNext from="/writing" />
+</Base>
+
+<style>
+  .list { padding-top: clamp(24px, 4vw, 48px); }
+</style>

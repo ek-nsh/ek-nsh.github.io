@@ -1,0 +1,30 @@
+---
+import { spritePath, type SpriteName } from '../lib/sprites';
+
+interface Props {
+  name: SpriteName;
+  /** Rendered size in CSS px (the icon is square). */
+  size?: number;
+  class?: string;
+}
+
+const { name, size = 27, class: className } = Astro.props;
+const { d, side, ox, oy } = spritePath(name);
+---
+
+<svg
+  class:list={['sprite', className]}
+  viewBox={`0 0 ${side} ${side}`}
+  width={size}
+  height={size}
+  fill="currentColor"
+  shape-rendering="crispEdges"
+  aria-hidden="true"
+  focusable="false"
+>
+  <path d={d} transform={`translate(${ox} ${oy})`}></path>
+</svg>
+
+<style>
+  .sprite { display: inline-block; flex: none; vertical-align: middle; }
+</style>

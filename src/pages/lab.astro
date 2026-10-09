@@ -1,0 +1,106 @@
+---
+import '../styles/desk.css';
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import PageNext from '../components/PageNext.astro';
+import Shelf from '../components/Shelf.astro';
+import Sprite from '../components/Sprite.astro';
+import { profile } from '../data/profile';
+
+const { shelf, now, chessCaption, chessMilestones } = profile.desk;
+---
+
+<Base title={`Lab · ${profile.fullName}`} description="A desk of small living objects: a chess corner, a shelf, a now page and a gravity toy.">
+  <PageHead kicker="The desk" title="Lab" lede="Small objects with their own behaviour. Most of them are alive; none of them are finished." />
+
+  <!-- L1 ---------------------------------------------------------------- -->
+  <section class="lab-block wrap lab-chess" id="chess">
+    <figure class="tile" data-reveal>
+      <div class="board" data-chess aria-hidden="true"></div>
+      <figcaption class="mono"><b>L1</b> Scholar's mate, on loop <span data-chess-caption>{chessCaption}</span></figcaption>
+    </figure>
+
+    <div class="copy" data-reveal>
+      <p class="mono"><Sprite name="knight" size={18} />Chess corner</p>
+      <h2>Chess, for the love of it.</h2>
+      <p class="body">I play for fun and in the occasional tournament. There is no rating on this page; the games and the stories matter more. Annotated games, with my commentary, are coming to this corner. Until then the board plays a short classic on a loop.</p>
+      <ul class="miles">
+        {chessMilestones.map(([name, text]) => (
+          <li><span class="mono">{name}</span><span>{text}</span></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- L3, L4 ------------------------------------------------------------ -->
+  <section class="lab-block wrap lab-row">
+    <figure class="tile" data-reveal>
+      <div class="term" data-now data-lines={JSON.stringify(now)}>
+        <p class="mono term-bar">now.txt</p>
+        <pre data-now-text></pre>
+      </div>
+      <figcaption class="mono"><b>L2</b> Now <span>what I am doing at the moment</span></figcaption>
+    </figure>
+
+    <figure class="tile" data-cursor-label="Launch" data-reveal>
+      <canvas class="toy" data-toy aria-label="Gravity toy: click to launch a body into orbit"></canvas>
+      <figcaption class="mono"><b>L3</b> Gravity toy <span>click to launch a body into orbit</span></figcaption>
+    </figure>
+  </section>
+
+  <!-- L2 ---------------------------------------------------------------- -->
+  <section class="lab-block wrap lab-shelf">
+    <div class="copy" data-reveal>
+      <p class="mono"><Sprite name="book" size={18} />The shelf</p>
+      <h2>A shelf, filling up.</h2>
+      <p class="body">A post that shaped how this blog reads. Hover a spine for the one-line take; a spine with a link opens in a new tab. The dashed slots are room for what comes next.</p>
+    </div>
+    <figure class="tile" data-reveal>
+      <Shelf items={shelf} tall />
+      <figcaption class="mono"><b>L4</b> Shelf <span data-shelf-take>hover a spine</span></figcaption>
+    </figure>
+  </section>
+
+  <section class="lab-block wrap soon" data-reveal>
+    <p class="mono"><Sprite name="star" size={18} />Not on the desk yet</p>
+    <ul>
+      <li>Annotated games with commentary</li>
+      <li>A sky toy: what is overhead, tonight</li>
+      <li>Photographs</li>
+    </ul>
+  </section>
+
+  <PageNext from="/lab" />
+</Base>
+
+<style>
+  .lab-block { padding-top: clamp(40px, 6vw, 88px); }
+
+  .lab-chess { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(28px, 5vw, 80px); align-items: center; }
+  .lab-chess .tile { max-width: 600px; }
+
+  .copy { display: grid; gap: 16px; align-content: start; }
+  .copy > .mono { display: flex; align-items: center; gap: 10px; }
+  .copy :global(.sprite) { color: var(--ember); }
+  .copy h2 { font-size: clamp(32px, 4.2vw, 62px); font-weight: 300; letter-spacing: -0.045em; line-height: 1.02; }
+  .copy .body { color: var(--ink-2); font-size: 17px; line-height: 1.6; max-width: 36em; }
+
+  .miles { border-top: 1px solid var(--ink); margin-top: 8px; }
+  .miles li { display: grid; grid-template-columns: 170px 1fr; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--line); align-items: baseline; font-size: 15.5px; color: var(--ink-2); }
+  .miles .mono { color: var(--ember); text-transform: none; letter-spacing: 0.01em; font-size: 12px; }
+
+  .lab-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2vw, 28px); }
+  .lab-row :global(.term), .lab-row :global(.toy) { min-height: 340px; }
+
+  .lab-shelf { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: clamp(24px, 5vw, 80px); align-items: end; }
+
+  .soon ul { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .soon li { padding: 7px 14px; border: 1px dashed var(--ash); border-radius: 999px; font-size: 14px; color: var(--ink-2); }
+  .soon > .mono { display: flex; align-items: center; gap: 10px; }
+  .soon :global(.sprite) { color: var(--ink-3); }
+
+  @media (max-width: 900px) {
+    .lab-chess, .lab-row, .lab-shelf { grid-template-columns: 1fr; }
+    .miles li { grid-template-columns: 1fr; gap: 4px; }
+  }
+</style>

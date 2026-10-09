@@ -1,0 +1,77 @@
+---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/source-serif-4';
+import '@fontsource-variable/source-serif-4/wght-italic.css';
+import '@fontsource/jetbrains-mono/400.css';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Finale from '../components/Finale.astro';
+import RecruiterMode from '../components/RecruiterMode.astro';
+import { profile } from '../data/profile';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = `${profile.fullName} · ${profile.tagline}`,
+  description = 'Ekansh Nangia: a CS student at VIT Chennai building distributed systems and AI tools, researching how software changes, and writing about how models work.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#fbfaf7" />
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+    <!-- Mark JS early so reveal animations never hide content when scripts fail. -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.classList.add('reduced');
+      }
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header />
+    <!-- A telescope reticle: ring, four ticks, a core. Over some things it locks on with corner brackets. -->
+    <div class="cursor" data-cursor aria-hidden="true">
+      <span class="c-reticle">
+        <i class="c-ring"></i><i class="c-tick t-n"></i><i class="c-tick t-e"></i><i class="c-tick t-s"></i><i class="c-tick t-w"></i>
+      </span>
+      <i class="c-core"></i>
+      <span class="c-lock"><i class="br tl"></i><i class="br tr"></i><i class="br bl"></i><i class="br brr"></i></span>
+      <span class="cursor-label"></span>
+    </div>
+
+    <!-- The page is the runway: as you reach its end, the black hole's dark spreads and swallows it. -->
+    <div class="page" data-page>
+      <main id="main">
+        <slot />
+      </main>
+    </div>
+    <Finale />
+    <RecruiterMode />
+
+    <script>
+      import '../scripts/site';
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  .page {
+    position: relative;
+    z-index: 2;
+    background: var(--bg);
+    padding-bottom: clamp(72px, 10vw, 130px);
+  }
+  /* Empty scroll runway for the black hole's reveal. */
+  .js:not(.reduced) .page { margin-bottom: 100svh; }
+</style>

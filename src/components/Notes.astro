@@ -1,0 +1,99 @@
+---
+import '../styles/desk.css';
+import '../styles/figure.css';
+import PostList from './PostList.astro';
+import Shelf from './Shelf.astro';
+import { profile } from '../data/profile';
+import type { PostItem } from '../lib/posts';
+
+interface Props {
+  posts: PostItem[];
+}
+
+const { posts } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const { shelf, now, chessCaption } = profile.desk;
+---
+
+<section class="section" id="notes">
+  <div class="wrap rail-grid">
+    <p class="rail" data-reveal><span class="mono idx">04</span><span class="mono">Writing, research &amp; lab</span></p>
+
+    <div class="rail-body two">
+      <div class="stack">
+        <div class="col" id="writing" data-reveal>
+          <div class="col-head">
+            <h2>Writing</h2>
+            <a class="all" href={`${base}/writing`} data-cursor-label="Open">All writing →</a>
+          </div>
+          <PostList posts={posts} tourFirst compact />
+        </div>
+
+        <div class="col" id="research" data-reveal data-tour="research">
+          <div class="col-head">
+            <h2>Research</h2>
+            <a class="all" href={`${base}/research`} data-cursor-label="Open">Research →</a>
+          </div>
+          <div class="plate" data-plate-frame>
+            <canvas class="plate-art" data-plate data-kind="cochange" data-seed="5" aria-hidden="true"></canvas>
+            <i class="vf tl"></i><i class="vf tr"></i><i class="vf bl"></i><i class="vf br"></i>
+            <span class="vfm mono m-tl">Change impact analysis</span>
+            <span class="vfm mono m-bl">In progress</span>
+          </div>
+          <p class="r-text">Which files change together, and can a method predict it without peeking at the future? A pipeline and a leak-proof benchmark, on Python repositories.</p>
+        </div>
+      </div>
+
+      <div class="col" id="lab" data-reveal>
+        <div class="col-head">
+          <h2>Lab</h2>
+          <a class="all" href={`${base}/lab`} data-cursor-label="Open">The desk →</a>
+        </div>
+
+        <div class="tiles">
+          <!-- L1: a pixel chess game that plays itself -->
+          <figure class="tile">
+            <div class="board" data-chess aria-hidden="true"></div>
+            <figcaption class="mono"><b>L1</b> Chess corner <span data-chess-caption>{chessCaption}</span></figcaption>
+          </figure>
+
+          <!-- L2: a shelf: hover a spine for the one-line take -->
+          <figure class="tile">
+            <Shelf items={shelf} />
+            <figcaption class="mono"><b>L2</b> Shelf <span data-shelf-take>hover a spine</span></figcaption>
+          </figure>
+
+          <!-- L3: the "now" page, typed out like a terminal -->
+          <figure class="tile">
+            <div class="term" data-now data-lines={JSON.stringify(now)}>
+              <p class="mono term-bar">now.txt</p>
+              <pre data-now-text></pre>
+            </div>
+            <figcaption class="mono"><b>L3</b> Now</figcaption>
+          </figure>
+
+          <!-- L4: click to launch pixel bodies into orbit -->
+          <figure class="tile" data-cursor-label="Launch">
+            <canvas class="toy" data-toy aria-label="Gravity toy: click to launch a body into orbit"></canvas>
+            <figcaption class="mono"><b>L4</b> Gravity toy <span>click to launch</span></figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .two { display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); gap: clamp(32px, 5vw, 76px); }
+  .stack { display: grid; gap: clamp(36px, 5vw, 64px); align-content: start; }
+
+  .col-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 14px; }
+  .col-head h2 { font-size: clamp(26px, 2.8vw, 40px); font-weight: 400; letter-spacing: -0.035em; }
+  .all { font-size: 14px; font-weight: 500; border-bottom: 1px solid currentColor; padding-bottom: 2px; transition: color 0.3s var(--ease); }
+  .all:hover { color: var(--ember); }
+
+  .r-text { margin-top: 16px; color: var(--ink-2); font-size: 15px; line-height: 1.55; max-width: 46ch; }
+  #research .plate { aspect-ratio: 2.1 / 1; }
+
+  @media (max-width: 960px) { .two { grid-template-columns: 1fr; } }
+</style>

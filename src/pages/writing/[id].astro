@@ -1,0 +1,47 @@
+---
+import { getCollection, render } from 'astro:content';
+import 'katex/dist/katex.min.css';
+import '../../styles/post.css';
+import Base from '../../layouts/Base.astro';
+import ReadRail from '../../components/ReadRail.astro';
+import { formatDate, getPosts } from '../../lib/posts';
+import { profile } from '../../data/profile';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('writing');
+  return posts.map((entry) => ({ params: { id: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await render(entry);
+const minutes = (await getPosts()).find((p) => p.entry.id === entry.id)?.minutes ?? 1;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const { title, description, date, updated, tags, sample } = entry.data;
+---
+
+<Base title={`${title} · ${profile.fullName}`} description={description}>
+  <ReadRail headings={headings} />
+  <article class="post">
+    <header class="post-head">
+      <a class="back mono" href={`${base}/writing`}>← Writing</a>
+      <h1>{title}</h1>
+      <p class="byline">
+        By {profile.fullName} · {formatDate(date, true)} · {minutes} min read
+        {updated && <span> · Updated {formatDate(updated, true)}</span>}
+      </p>
+      <ul class="post-tags">
+        {tags.map((t) => <li class="mono">{t}</li>)}
+        {sample && <li class="mono sample">sample post</li>}
+      </ul>
+    </header>
+
+    <div class="prose">
+      <Content />
+    </div>
+
+    <aside class="post-end">
+      <p>Disagree, or know a better way to say it? <a href={`mailto:${profile.email}`}>Write to me</a>.</p>
+      <a class="back mono" href={`${base}/writing`}>← All writing</a>
+    </aside>
+  </article>
+</Base>

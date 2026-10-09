@@ -1,0 +1,155 @@
+---
+import { profile } from '../data/profile';
+---
+
+<!-- The end of the page is a black hole. As you reach it, a disc of dark grows outward from it
+     and swallows the page. Without JavaScript (or with reduced motion) this is just a section. -->
+<footer class="finale" data-finale>
+  <canvas class="stars fade" data-stars aria-hidden="true"></canvas>
+
+  <div class="remnant-wrap" data-remnant-wrap aria-hidden="true">
+    <canvas class="remnant" data-remnant></canvas>
+  </div>
+
+  <canvas class="hole-canvas fade" data-hole-canvas aria-hidden="true"></canvas>
+
+  <!-- The contact button *is* the hole: reaching for it makes everything orbit faster. -->
+  <a class="hole-cta" href={`mailto:${profile.email}`} data-hole-cta data-cursor-lock data-cursor-label="Fall in">
+    <span class="fade">Get in touch</span>
+  </a>
+
+  <div class="finale-inner fade" data-finale-inner>
+    <div class="finale-main" data-tour="contact">
+      <p class="mono">Contact</p>
+      <h2>Let's work<br />together.</h2>
+      <div class="actions">
+        <button class="pill-light" type="button" data-copy={profile.email} data-cursor-label="Copy">
+          <span data-copy-text>{profile.email}</span>
+        </button>
+        <span class="pill-light is-off" aria-disabled="true">Resume · soon</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="finale-foot fade" data-finale-foot>
+    <p class="note">Built with Astro · © 2026 {profile.fullName}</p>
+    <div class="live">
+      <span class="mono" data-mytime data-zone={profile.timezone.zone} data-zone-label={profile.timezone.label}>
+        My time <b data-clock>--:--</b> <span data-zone-text>{profile.timezone.label}</span>
+        <span class="offset" data-offset></span>
+      </span>
+      <span class="moon mono">
+        <svg data-moon width="16" height="16" viewBox="-8 -8 16 16" aria-hidden="true"></svg>
+        <span data-moon-label>Moon</span>
+      </span>
+    </div>
+    <div class="foot-right">
+      <button class="disc mono" type="button" data-disc>
+        Discoveries <span class="slots" data-disc-slots aria-hidden="true"></span>
+      </button>
+      <ul class="socials">
+        {profile.socials.filter((s) => s.href && s.href !== '#').map((s) => <li><a href={s.href} target={s.href.startsWith('http') ? '_blank' : undefined} rel={s.href.startsWith('http') ? 'noopener' : undefined}>{s.label}</a></li>)}
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<!-- A hairline where the dark meets the paper. -->
+<div class="horizon-edge" data-edge aria-hidden="true"></div>
+
+<style>
+  /* Without JS or with reduced motion: a plain dark section at the end of the page. */
+  .finale {
+    --cx: 68%; --cy: 47%; --hs: 640px; --d: 132px;
+    position: relative; min-height: 100svh; overflow: hidden;
+    background: var(--space); color: var(--space-ink);
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  /* With JS: fixed over the page, visible only inside a disc that grows from the hole. */
+  :global(.js:not(.reduced)) .finale {
+    position: fixed; inset: 0; height: 100svh; z-index: 3;
+    clip-path: circle(var(--r, 0px) at var(--cx) var(--cy));
+  }
+
+  .stars { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  .remnant-wrap {
+    --rw: min(112vmin, 1120px);
+    position: absolute; left: calc(var(--cx) - var(--rw) / 2); top: calc(var(--cy) - var(--rw) / 2);
+    width: var(--rw); aspect-ratio: 1;
+    will-change: transform, opacity;
+  }
+  .remnant { width: 100%; height: 100%; animation: drift 360s linear infinite; }
+  @keyframes drift { to { rotate: 360deg; } }
+
+  .hole-canvas { position: absolute; left: calc(var(--cx) - var(--hs) / 2); top: calc(var(--cy) - var(--hs) / 2); }
+
+  .hole-cta {
+    position: absolute; z-index: 2;
+    left: calc(var(--cx) - var(--d) / 2); top: calc(var(--cy) - var(--d) / 2);
+    width: var(--d); height: var(--d); border-radius: 50%;
+    display: grid; place-items: center; text-align: center;
+    font-size: 14px; font-weight: 500; letter-spacing: 0.01em; color: var(--space-ink);
+    transition: color 0.3s var(--ease);
+  }
+  .hole-cta:hover { color: #fff; }
+
+  /* While the disc is still small it should be a clean black dot, not a porthole onto fragments of
+     text, so the words fade in as the dark opens (--fade is set from finale.ts; it is 1 without JS). */
+  .fade { opacity: var(--fade, 1); }
+
+  .finale-inner {
+    position: relative; z-index: 1; flex: 1;
+    display: flex; align-items: center;
+    padding: calc(var(--header-h) + 2svh) var(--pad) 0;
+  }
+  .finale-main { display: grid; gap: clamp(18px, 3vh, 32px); }
+  .finale-main .mono { color: rgba(244, 241, 236, 0.5); }
+  h2 { font-size: clamp(52px, 9vw, 156px); font-weight: 300; line-height: 0.94; letter-spacing: -0.05em; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+  .pill-light {
+    display: inline-flex; align-items: center; height: 40px; padding-inline: 18px;
+    border: 1px solid rgba(244, 241, 236, 0.35); border-radius: 999px; background: transparent;
+    font-size: 13px; font-weight: 500; color: var(--space-ink);
+    transition: background-color 0.3s var(--ease), color 0.3s var(--ease), border-color 0.3s var(--ease);
+  }
+  button.pill-light:hover { background: var(--space-ink); color: var(--space); }
+  .pill-light.is-off { opacity: 0.45; cursor: default; }
+
+  .finale-foot {
+    position: relative; z-index: 1;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 28px;
+    margin: 0 var(--pad); padding: 20px 0 26px;
+    border-top: 1px solid rgba(244, 241, 236, 0.1);
+    font-size: 13px; color: rgba(244, 241, 236, 0.55);
+  }
+  .live { display: flex; gap: 22px; align-items: center; }
+  .live .mono { color: rgba(244, 241, 236, 0.55); text-transform: none; }
+  .live b { font-weight: 400; color: var(--space-ink); font-variant-numeric: tabular-nums; }
+  .offset { margin-left: 6px; opacity: 0.7; }
+  .moon { display: inline-flex; align-items: center; gap: 8px; }
+  .moon svg { color: var(--space-ink); }
+
+  .foot-right { display: flex; align-items: center; gap: 26px; }
+  .disc { display: inline-flex; align-items: center; gap: 10px; color: rgba(244, 241, 236, 0.55); text-transform: none; transition: color 0.3s var(--ease); }
+  .disc:hover { color: var(--space-ink); }
+  .slots { display: inline-flex; gap: 3px; }
+  :global(.slots .slot) { width: 7px; height: 7px; border: 1px solid rgba(244, 241, 236, 0.35); transition: background-color 0.4s var(--ease), border-color 0.4s var(--ease); }
+  :global(.slots .slot.is-found) { background: var(--amber); border-color: var(--amber); }
+  .socials { display: flex; gap: 20px; }
+  .socials a { transition: color 0.3s var(--ease); }
+  .socials a:hover { color: var(--ember); }
+
+  .horizon-edge {
+    position: fixed; z-index: 4; left: 0; top: 0; width: 0; height: 0; border-radius: 50%;
+    border: 1px solid rgba(242, 160, 61, 0.55); pointer-events: none; display: none;
+  }
+
+  @media (max-width: 760px) {
+    .finale { --cx: 50%; --cy: 31%; --hs: 420px; --d: 108px; }
+    .finale-inner { align-items: flex-end; padding-bottom: 5svh; }
+    .live { gap: 14px; }
+    .foot-right { gap: 18px; }
+  }
+</style>

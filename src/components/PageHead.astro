@@ -1,0 +1,23 @@
+---
+interface Props {
+  kicker?: string;
+  title: string;
+  lede?: string;
+}
+
+const { kicker, title, lede } = Astro.props;
+---
+
+<header class="page-head wrap">
+  {kicker && <p class="mono kicker" data-reveal><span class="idx">●</span>{kicker}</p>}
+  <h1 class="section-title" data-reveal>{title}</h1>
+  {lede && <p class="lede" data-reveal>{lede}</p>}
+</header>
+
+<style>
+  .page-head { padding-top: calc(var(--header-h) + clamp(40px, 8vw, 110px)); }
+  .kicker { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .idx { color: var(--ember); font-size: 8px; }
+  .section-title { margin-bottom: clamp(16px, 2vw, 26px); }
+  .lede { color: var(--ink-2); font-size: clamp(17px, 1.7vw, 23px); line-height: 1.4; letter-spacing: -0.01em; max-width: 34em; }
+</style>

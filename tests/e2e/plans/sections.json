@@ -1,0 +1,15 @@
+{
+  "url": "http://localhost:4321/",
+  "width": 1440,
+  "height": 900,
+  "initialWait": 7000,
+  "steps": [
+    { "name": "01-hero", "wait": 300, "eval": "JSON.stringify({ pageHeight: document.documentElement.scrollHeight })" },
+    { "name": "02-about", "scroll": "#about", "offset": -60, "wait": 2600 },
+    { "name": "03-trajectory", "scroll": "#trajectory", "offset": -80, "wait": 4500 },
+    { "name": "04-work", "scroll": "#work", "offset": -80, "wait": 3000 },
+    { "name": "05-desk", "scroll": "#notes", "offset": -80, "wait": 7500 },
+    { "name": "06-iris-halfway", "eval": "window.scrollTo({ top: document.documentElement.scrollHeight - innerHeight - 0.5 * 900, behavior: 'instant' }); 1", "wait": 2500 },
+    { "name": "07-finale", "eval": "window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }); 1", "wait": 3000 }
+  ]
+}

@@ -1,0 +1,108 @@
+/* Long-form reading layout with Tufte-style margin notes. */
+
+.post {
+  --col: 680px;
+  --note: 250px;
+  --gap: 34px;
+  max-width: calc(var(--col) + var(--note) + var(--gap) + var(--pad) * 2);
+  margin-inline: auto;
+  padding: calc(var(--header-h) + clamp(40px, 8vw, 110px)) var(--pad) 0;
+}
+
+.post-head, .prose { max-width: var(--col); }
+
+.back { display: inline-block; margin-bottom: 28px; transition: color 0.3s var(--ease); }
+.back:hover { color: var(--ember); }
+
+.post-head h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(36px, 5.2vw, 62px);
+  font-weight: 500;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+}
+.byline { margin-top: 20px; color: var(--ink-2); font-size: 15px; }
+.post-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 48px; }
+.post-tags li { padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; }
+.post-tags .sample { color: var(--ember); border-color: color-mix(in srgb, var(--ember) 40%, transparent); }
+
+/* ---------- Prose ---------- */
+.prose {
+  font-family: var(--font-serif);
+  font-size: 19.5px;
+  line-height: 1.72;
+  color: #1d1d1d;
+  hyphens: manual;
+}
+.prose p { margin: 0 0 1.3em; }
+.prose h2 {
+  font-family: var(--font-serif);
+  font-size: 29px; font-weight: 600; letter-spacing: -0.015em; line-height: 1.2;
+  margin: 2.1em 0 0.7em;
+}
+.prose a { color: var(--ember); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.prose ul { list-style: disc; padding-left: 1.3em; margin: 0 0 1.3em; }
+.prose li { margin-bottom: 0.45em; padding-left: 0.2em; }
+.prose li::marker { color: var(--ember); }
+.prose strong { font-weight: 600; }
+.prose em { font-style: italic; }
+.prose > p:first-child em { color: var(--ink-2); }
+
+.prose code {
+  font-family: var(--font-mono); font-size: 0.82em; background: var(--wash); padding: 2px 6px; border-radius: 4px;
+  hyphens: none; overflow-wrap: anywhere;
+}
+
+.post-end { max-width: var(--col); margin-top: clamp(48px, 6vw, 80px); padding-top: 22px; border-top: 1px solid var(--line); display: grid; gap: 18px; }
+.post-end p { font-family: var(--font-serif); font-size: 20px; line-height: 1.45; }
+.post-end p a { color: var(--ember); border-bottom: 1px solid currentColor; }
+
+.katex { font-size: 1.06em; }
+.katex-display { margin: 1.5em 0; overflow-x: auto; overflow-y: hidden; padding-block: 0.3em; }
+
+/* ---------- Footnote references ---------- */
+.prose sup { font-family: var(--font-sans); font-size: 0.62em; line-height: 0; margin-left: 1px; }
+.prose .fn-ref {
+  color: var(--ember); font-weight: 600; text-decoration: none;
+  padding: 1px 3px; border-radius: 4px;
+  transition: background-color 0.25s var(--ease);
+}
+.prose .fn-ref.is-active { background: color-mix(in srgb, var(--ember) 16%, transparent); }
+
+/* ---------- Narrow screens: classic footnotes at the end ---------- */
+.prose .sidenote { display: none; }
+.prose .footnotes {
+  margin-top: 3.2em; padding-top: 1.4em; border-top: 1px solid var(--line);
+  font-family: var(--font-sans); font-size: 15px; line-height: 1.55; color: var(--ink-2);
+}
+.prose .footnotes ol { padding-left: 1.3em; list-style: decimal; }
+.prose .footnotes li { margin-bottom: 0.7em; }
+.prose .footnotes li::marker { color: var(--ember); font-weight: 600; }
+.prose .footnotes p { margin: 0; }
+.prose .footnotes a[data-footnote-backref] { text-decoration: none; margin-left: 4px; }
+
+/* ---------- Wide screens: margin notes ---------- */
+@media (min-width: 1100px) {
+  .prose .footnotes { display: none; }
+
+  .prose .sidenote {
+    display: block;
+    float: right; clear: right;
+    width: var(--note);
+    margin: 0.35em calc(-1 * (var(--note) + var(--gap))) 1.2em 0;
+    font-family: var(--font-sans);
+    font-size: 14px; line-height: 1.5; letter-spacing: -0.003em;
+    color: var(--ink-2);
+    position: relative;
+    transition: color 0.3s var(--ease);
+  }
+  .prose .sidenote::before {
+    content: ''; position: absolute; left: calc(-1 * var(--gap) / 2); top: 0.3em; bottom: 0.3em;
+    width: 1px; background: var(--line);
+    transition: background-color 0.3s var(--ease);
+  }
+  .prose .sidenote.is-active { color: var(--ink); }
+  .prose .sidenote.is-active::before { background: var(--ember); }
+  .prose .sidenote-num { color: var(--ember); font-weight: 600; margin-right: 6px; font-variant-numeric: tabular-nums; }
+  .prose .sidenote .katex { font-size: 1em; }
+}

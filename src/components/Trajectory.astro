@@ -1,0 +1,101 @@
+---
+import { lead, stages } from '../data/trajectory';
+import Sprite from './Sprite.astro';
+
+const items = stages.filter((s) => s.home);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+// Vertical offsets make the path drift like a constellation instead of a ruler.
+const drift = [0, 44, 6, 52, 14, 40];
+---
+
+<section class="section" id="trajectory">
+  <div class="wrap rail-grid">
+    <p class="rail" data-reveal><span class="mono idx">02</span><span class="mono">Trajectory</span></p>
+
+    <div class="rail-body">
+      <p class="lead" data-words>
+        {lead.split(' ').map((w) => <span class="w"><span>{w}</span></span>).flatMap((el, i, a) => (i < a.length - 1 ? [el, ' '] : [el]))}
+      </p>
+
+      <div class="traj" data-traj data-tour="trajectory">
+        <!-- The path is drawn by src/scripts/trajectory.ts once positions are known. -->
+        <svg class="traj-svg" aria-hidden="true" data-traj-svg>
+          <defs>
+            <linearGradient id="trajGrad" gradientUnits="userSpaceOnUse" data-traj-grad>
+              <stop offset="0" stop-color="#b9b7b2"></stop>
+              <stop offset="0.55" stop-color="#f2a03d"></stop>
+              <stop offset="1" stop-color="#e8532f"></stop>
+            </linearGradient>
+          </defs>
+          <path class="traj-base" data-traj-base d=""></path>
+          <path class="traj-path" data-traj-path d="" stroke="url(#trajGrad)"></path>
+        </svg>
+
+        <ol class="traj-list">
+          {items.map((t, i) => (
+            <li class:list={['traj-node', { 'is-now': t.now }]} data-traj-node style={`--dy:${drift[i % drift.length]}px`}>
+              <span class="traj-dot" data-traj-dot aria-hidden="true"></span>
+              <span class="mono when"><Sprite name={t.sprite} size={18} />{t.when}</span>
+              <h3>{t.title}</h3>
+              <p>{t.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+      <a class="more" href={`${base}/trajectory`} data-cursor-label="Open">The full trajectory <i aria-hidden="true">→</i></a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .lead {
+    font-size: clamp(24px, 3vw, 44px); line-height: 1.22; letter-spacing: -0.03em; max-width: 22em;
+    margin-bottom: clamp(36px, 5vw, 64px);
+  }
+
+  .traj { position: relative; }
+  .traj-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  .traj-base, .traj-path { fill: none; stroke-linecap: round; }
+  .traj-base { stroke: var(--line); stroke-width: 1; }
+  .traj-path { stroke-width: 1.5; }
+
+  .traj-list { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 0 clamp(16px, 2vw, 32px); padding-bottom: 64px; }
+
+  .traj-node { position: relative; padding-top: 0; transform: translateY(var(--dy, 0)); transition: opacity 0.4s var(--ease); }
+  .traj:has(.traj-node:hover) .traj-node:not(:hover) { opacity: 0.4; }
+
+  /* Flat dots: hollow until the path reaches them, then solid in the colour of the path. */
+  .traj-dot {
+    display: block; width: 12px; height: 12px; margin-bottom: 18px; border-radius: 50%;
+    background: var(--bg); border: 1.5px solid var(--ash);
+    transition: background-color 0.5s var(--ease), border-color 0.5s var(--ease), scale 0.4s var(--ease);
+  }
+  .traj-dot.is-lit { background: var(--c, var(--ember)); border-color: var(--c, var(--ember)); }
+  .traj-node:hover .traj-dot { scale: 1.45; }
+
+  .is-now .traj-dot.is-lit { animation: now-ring 2.8s ease-out infinite; }
+  @keyframes now-ring {
+    0% { box-shadow: 0 0 0 0 rgba(232, 83, 47, 0.4); }
+    70%, 100% { box-shadow: 0 0 0 12px rgba(232, 83, 47, 0); }
+  }
+
+  .when { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .when :global(.sprite) { color: var(--ink); }
+  .is-now .when, .is-now .when :global(.sprite) { color: var(--ember); }
+  h3 { font-size: 18px; font-weight: 500; letter-spacing: -0.02em; line-height: 1.2; }
+  .traj-node p { margin-top: 8px; font-size: 14px; line-height: 1.5; color: var(--ink-2); max-width: 24ch; }
+
+  .more { display: inline-flex; gap: 8px; margin-top: 6px; font-size: 14px; font-weight: 500; border-bottom: 1px solid currentColor; padding-bottom: 2px; transition: color 0.3s var(--ease); }
+  .more i { font-style: normal; transition: transform 0.4s var(--ease); }
+  .more:hover { color: var(--ember); }
+  .more:hover i { transform: translateX(4px); }
+
+  /* Phones: a quiet vertical thread instead of a drifting path. */
+  @media (max-width: 860px) {
+    .traj-svg { display: none; }
+    .traj-list { grid-template-columns: 1fr; gap: 28px; padding: 0 0 0 28px; border-left: 1px solid var(--line); margin-left: 6px; }
+    .traj-node { transform: none; }
+    .traj-dot { position: absolute; left: -35px; top: 2px; margin: 0; }
+    .traj-node p { max-width: 40ch; }
+  }
+</style>
