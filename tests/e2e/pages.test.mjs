@@ -78,7 +78,8 @@ await sleep(300);
 await page.evaluate(() => document.querySelector('[data-id="llm-hive"]').scrollIntoView({ block: 'center', behavior: 'instant' }));
 await sleep(500);
 await Promise.all([page.waitForNavigation({ waitUntil: 'load' }), page.click('[data-id="llm-hive"]')]);
-check('chart: clicking a star opens that project page', page.url().endsWith('/work/llm-hive'), page.url());
+// (GitHub Pages redirects /work/llm-hive to /work/llm-hive/, so accept both.)
+check('chart: clicking a star opens that project page', /\/work\/llm-hive\/?$/.test(page.url()), page.url());
 
 /* ---------- Project pages and their figures ---------- */
 for (const slug of ['llm-hive', 'saas-financial-simulator', 'orbit', 'ev-route-optimizer']) {
